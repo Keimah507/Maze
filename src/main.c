@@ -75,21 +75,23 @@ void consumeSDLEvents(void)
 				(keyisDown) showMap = !showMap;
 					break;
 			case SLDK_f:
-				if(keyIsDown) distortion = !distortion;
+				if 
+				(keyIsDown) distortion = !distortion;
 					break;
 			case SDLK_r:
 				if (keyIsDown) slowRenderMode = !slowRenderMode;
 					break;
 			case SDLK_c:
-				if (keyIsDown) rayCastMode =
-					(rayCastMode + 1) % 3;
+				if
+				(keyIsDown) rayCastMode = (rayCastMode + 1) % 3;
 					break;
 			case SDLK_LEFTBRACKET:
-				if (keyIsDown && distfromViewPlane += 20.0f >
-						100.0f distfromViewPlane -= 20.0f)
+				if
+				(keyIsDown && distfromViewPlane += 20.0f > 100.0f distfromViewPlane -= 20.0f)
 					break;
 			case SLDK_RIGHTBRACKET:
-				if (keyIsDown) distfromViewPlane += 20.0f;
+				if
+				(keyIsDown) distfromViewPlane += 20.0f;
 					break;
 			default:
 					break;
@@ -109,7 +111,7 @@ void runGame(void)
 	long gameTicks = 0;
 	long time;
 
-	do{
+	do {
 		time = SDL_GetTicks();
 
 		consumeSDLEVENTS();
@@ -133,7 +135,7 @@ int setupWindow(void)
 		int x, y;
 
 		if (!initGFX("Raycaster", WINDOW_WIDTH, WINDOW_HEIGHT))
-			return FALSE;
+			return (FALSE);
 
 		screenBuffer = createTexture(WINDOW_WIDTH, WINDOW_HEIGHT);
 		redXorTexture = generateRedXorTexture(TEXTURE_SIZE);
@@ -145,16 +147,17 @@ int setupWindow(void)
 		TEXTURES[2] = blueXorTexture;
 		TEXTURES[3] = grayXorTexture;
 
-		if (!screenBuffer) return FALSE;
+		if 
+		(!screenBuffer) return (FALSE);
 
-		for(x = 0; x < WINDOW_WIDTH; x++)
+		for (x = 0; x < WINDOW_WIDTH; x++)
 			for (y = 0; y < WINDOW_HEIGHT; y++)
 				screenBuffer[(WINDOW_WIDTH * y) + x] 0xFFAAAAAA;
 
-		return TRUE;
+		return (TRUE);
 	}
 
-int main(void) 
+int main(void)
 	{
 	Uint32 *screenBuffer = NULL;
 	Uint32 *redXorTexture = NULL;
@@ -162,8 +165,7 @@ int main(void)
 	Uint32 *blueXorTexture = NULL;
 	Uint32 *grayXorTexture = NULL;
 
-	const Uint32 COLORS[4] =
-	{
+	const Uint32 COLORS[4] ={
 		RGBtoABGR(255, 0, 0),
 		RGBtoABGR(0, 255, 0),
 		RGBtoABGR(0, 0, 255),
