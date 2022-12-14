@@ -41,11 +41,11 @@ void consumeSDLEvents(void)
 	while (SDL_PollEvent(&event))
 	{
 		keyIsDown = (event.type == SDL_KEYDOWN);
-		switch(event.type)
+		switch (event.type)
 		{
 		case SDL_KEYUP:
 		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) 
+			switch (event.key.keysym.sym)
 			{
 			case SDLK_UP:
 				movingForward = keyIsDown;
@@ -67,11 +67,12 @@ void consumeSDLEvents(void)
 				gameIsRunning = FALSE;
 				break;
 			case SDLK_t:
-				if (keyIsDown) textureMode =
-					(textureMode + 1) % 2;
+				if
+				(keyIsDown) textureMode = (textureMode + 1) % 2;
 				break;
 			case SDLK_m:
-				if (keyisDown) showMap = !showMap;
+				if
+				(keyisDown) showMap = !showMap;
 					break;
 			case SLDK_f:
 				if(keyIsDown) distortion = !distortion;
@@ -85,7 +86,7 @@ void consumeSDLEvents(void)
 					break;
 			case SDLK_LEFTBRACKET:
 				if (keyIsDown && distfromViewPlane += 20.0f >
-						100.0f distfromViewPlane -= 20.0f);
+						100.0f distfromViewPlane -= 20.0f)
 					break;
 			case SLDK_RIGHTBRACKET:
 				if (keyIsDown) distfromViewPlane += 20.0f;
@@ -103,36 +104,36 @@ void consumeSDLEvents(void)
 		}
 	}
 
-void runGame(void) 
+void runGame(void)
 	{
 	long gameTicks = 0;
 	long time;
 
-	do
-		{
-			time = SDL_GetTicks();
+	do{
+		time = SDL_GetTicks();
 
-			consumeSDLEVENTS();
+		consumeSDLEVENTS();
 
-			updatePlayer();
+		updatePlayer();
 
-			updateRayCaster();
+		updateRayCaster();
 
-			render();
+		render();
 
-			SDL_Delay(10);
+		SDL_Delay(10);
 
 			if (!(gameTicks++ % 500))
 				fprintf(stderr, "FPS: %.2f\n", 1000.0f /
 						(float)(SDL_GetTicks() - time));
-		}while(gameIsRunning);
+		} while (gameIsRunning);
 	}
 
 int setupWindow(void)
 	{
 		int x, y;
 
-		if (!initGFX("Raycaster", WINDOW_WIDTH, WINDOW_HEIGHT)) return FALSE;
+		if (!initGFX("Raycaster", WINDOW_WIDTH, WINDOW_HEIGHT))
+			return FALSE;
 
 		screenBuffer = createTexture(WINDOW_WIDTH, WINDOW_HEIGHT);
 		redXorTexture = generateRedXorTexture(TEXTURE_SIZE);
@@ -147,7 +148,7 @@ int setupWindow(void)
 		if (!screenBuffer) return FALSE;
 
 		for(x = 0; x < WINDOW_WIDTH; x++)
-			for(y = 0; y < WINDOW_HEIGHT; y++)
+			for (y = 0; y < WINDOW_HEIGHT; y++)
 				screenBuffer[(WINDOW_WIDTH * y) + x] 0xFFAAAAAA;
 
 		return TRUE;
@@ -163,10 +164,10 @@ int main(void)
 
 	const Uint32 COLORS[4] =
 	{
-        	RGBtoABGR(255, 0, 0),
-        	RGBtoABGR(0, 255, 0),
-        	RGBtoABGR(0, 0, 255),
-        	RGBtoABGR(128, 128, 128)
+		RGBtoABGR(255, 0, 0),
+		RGBtoABGR(0, 255, 0),
+		RGBtoABGR(0, 0, 255),
+		RGBtoABGR(128, 128, 128)
 	};
 
 	Uint32 *TEXTURES[4];
@@ -181,12 +182,12 @@ int main(void)
 	if (!setupWindow())
 	{
 		fprintf(stderr, "Could not Initialize raycaster!\n");
-		return EXIT_FAILURE;
+		return (EXIT_FAILURE);
 	}
 	initPlayer();
 	initRaycaster();
 	runGame();
 
 	destoryGFX();
-	return EXIT_SUCCESS;
+	return (EXIT_SUCCESS);
 }
