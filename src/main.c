@@ -75,11 +75,12 @@ void consumeSDLEvents(void)
 				(keyisDown) showMap = !showMap;
 					break;
 			case SLDK_f:
-				if 
+				if
 				(keyIsDown) distortion = !distortion;
 					break;
 			case SDLK_r:
-				if (keyIsDown) slowRenderMode = !slowRenderMode;
+				if
+				(keyIsDown) slowRenderMode = !slowRenderMode;
 					break;
 			case SDLK_c:
 				if
@@ -147,7 +148,7 @@ int setupWindow(void)
 		TEXTURES[2] = blueXorTexture;
 		TEXTURES[3] = grayXorTexture;
 
-		if 
+		if
 		(!screenBuffer) return (FALSE);
 
 		for (x = 0; x < WINDOW_WIDTH; x++)
@@ -165,7 +166,7 @@ int main(void)
 	Uint32 *blueXorTexture = NULL;
 	Uint32 *grayXorTexture = NULL;
 
-	const Uint32 COLORS[4] ={
+	const Uint32 COLORS[4] = {
 		RGBtoABGR(255, 0, 0),
 		RGBtoABGR(0, 255, 0),
 		RGBtoABGR(0, 0, 255),
