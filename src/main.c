@@ -1,196 +1,128 @@
 #include <stdio.h>
-#include <stdlib.h>
-
-#include "config.h"
-#include "raycaster.h"
-#include "renderer.h"
-#include "player.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include "variables.h"
+#include "gfx.h"
 #include "map.h"
+#include "player.h"
+#include "ray.h"
+#include "wall.h"
+#include "sprite.h"
+#include "textures.h"
 
-const short MAP[MAP_GRID_HEIGHT][MAP_GRID_WIDTH] = {
-	{R, R, R, R, R, R, R, R, R, R},
-	{R, B, 0, 0, 0, 0, P, 0, B, R},
-	{R, 0, 0, 0, 0, 0, 0, 0, 0, R},
-	{R, 0, 0, G, 0, 0, G, 0, 0, R},
-	{R, 0, 0, 0, 0, 0, 0, 0, 0, R},
-	{R, 0, 0, 0, 0, 0, 0, 0, 0, R},
-	{R, 0, 0, G, 0, 0, G, 0, 0, R},
-	{R, 0, 0, 0, 0, 0, 0, 0, 0, R},
-	{R, B, 0, 0, 0, 0, 0, 0, B, R},
-	{R, R, R, R, R, R, R, R, R, R},
-};
+bool	isGameRunning = false;
+int		ticksLastFrame;
 
+void	setup(void)
+{
+	// Asks uPNG library to decode all PNG files and loads the wallTextures array
+	loadTextures();
+}
 
-void render(void)
+void	processInput(void)
+{
+	SDL_Event	event;
+
+	SDL_PollEvent(&event);
+	switch (event.type)
 	{
-		if (showMap)
+		case SDL_QUIT:
 		{
-			clearRenderer();
-			renderOverheadMap();
-		} else
-			{
-				renderProjectedScene();
-			}
-	}
-
-void consumeSDLEvents(void)
-	{
-	SDL_EVENT event;
-	char KeyIsDown;
-
-	while (SDL_PollEvent(&event))
-	{
-		keyIsDown = (event.type == SDL_KEYDOWN);
-		switch (event.type)
-		{
-		case SDL_KEYUP:
+			isGameRunning = false;
+			break;
+		}
 		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym)
-			{
-			case SDLK_UP:
-				movingForward = keyIsDown;
-				break;
-			case SDLK_DOWN:
-				movingBack = keyIsDown;
-				break;
-			case SDLK_LEFT:
-				turningleft = keyIsDown;
-				break;
-			case SDLK_RIGHT:
-				turningRight = keyIsDown;
-				break;
-			case SDLK_LSHIFT:
-			case SDLK_RSHIFT:
-				playerIsRunning = KeyIsDown;
+		{
+			if (event.key.keysym.sym == SDLK_ESCAPE)
+				isGameRunning = false;
+			if (event.key.keysym.sym == SDLK_UP)
+				player.walkDirection = +1;
+			if (event.key.keysym.sym == SDLK_DOWN)
+				player.walkDirection = -1;
+			if (event.key.keysym.sym == SDLK_RIGHT)
+				player.turnDirection = +1;
+			if (event.key.keysym.sym == SDLK_LEFT)
+				player.turnDirection = -1;
 			break;
-				case SDLK_ESCAPE:
-				gameIsRunning = FALSE;
-				break;
-			case SDLK_t:
-				if
-				(keyIsDown) textureMode = (textureMode + 1) % 2;
-				break;
-			case SDLK_m:
-				if
-				(keyisDown) showMap = !showMap;
-					break;
-			case SLDK_f:
-				if
-				(keyIsDown) distortion = !distortion;
-					break;
-			case SDLK_r:
-				if
-				(keyIsDown) slowRenderMode = !slowRenderMode;
-					break;
-			case SDLK_c:
-				if
-				(keyIsDown) rayCastMode = (rayCastMode + 1) % 3;
-					break;
-			case SDLK_LEFTBRACKET:
-				if
-				(keyIsDown && distfromViewPlane += 20.0f > 100.0f distfromViewPlane -= 20.0f)
-					break;
-			case SLDK_RIGHTBRACKET:
-				if
-				(keyIsDown) distfromViewPlane += 20.0f;
-					break;
-			default:
-					break;
-				}
-					break;
-			case SDL_QUIT:
-				gameIsRunning = FALSE;
-				break;
-			default:
+		}
+		case SDL_KEYUP:
+		{
+			if (event.key.keysym.sym == SDLK_ESCAPE)
+				isGameRunning = false;
+			if (event.key.keysym.sym == SDLK_UP)
+				player.walkDirection = 0;
+			if (event.key.keysym.sym == SDLK_DOWN)
+				player.walkDirection = 0;
+			if (event.key.keysym.sym == SDLK_RIGHT)
+				player.turnDirection = 0;
+			if (event.key.keysym.sym == SDLK_LEFT)
+				player.turnDirection = 0;
 			break;
-			}
 		}
 	}
+}
 
-void runGame(void)
-	{
-	long gameTicks = 0;
-	long time;
+void	update(void)
+{
+	int		timeToWait;
+	float	deltaTime;
 
-	do {
-		time = SDL_GetTicks();
+	// Compute how long we have until the reach the target frame time in milliseconds
+	timeToWait = FRAME_TIME_LENGTH - (SDL_GetTicks() - ticksLastFrame);
 
-		consumeSDLEVENTS();
+	// Only delay execution if we are running too fast
+	if (timeToWait > 0 && timeToWait <= FRAME_TIME_LENGTH) {
+		SDL_Delay(timeToWait);
+	}
 
-		updatePlayer();
+	// Compute the delta time to be used as an update factor when changing game objects
+	deltaTime = (SDL_GetTicks() - ticksLastFrame) / 1000.0f;
 
-		updateRayCaster();
+	// Store the milliseconds of the current frame to be used in the future
+	ticksLastFrame = SDL_GetTicks();
 
+	movePlayer(deltaTime);
+	castAllRays();
+}
+
+void	render(void)
+{
+	// clear the color buffer
+	clearColorBuffer(0xFF000000);
+
+	// Render the wall and sprites
+	renderWallProjection();
+	renderSpriteProjection();
+
+	// Render the minimap objects
+	// display the minimap
+	renderMapGrid();
+	renderMapRays();
+	renderMapSprites();
+	renderMapPlayer();
+
+	renderColorBuffer();
+}
+
+void	releaseResources(void)
+{
+	freeTextures();
+	destroyWindow();
+}
+
+int	main(void)
+{
+	isGameRunning = initializeWindow();
+
+	setup();
+
+	while (isGameRunning) {
+		processInput();
+		update();
 		render();
-
-		SDL_Delay(10);
-
-			if (!(gameTicks++ % 500))
-				fprintf(stderr, "FPS: %.2f\n", 1000.0f /
-						(float)(SDL_GetTicks() - time));
-		} while (gameIsRunning);
 	}
 
-int setupWindow(void)
-	{
-		int x, y;
+	releaseResources();
 
-		if (!initGFX("Raycaster", WINDOW_WIDTH, WINDOW_HEIGHT))
-			return (FALSE);
-
-		screenBuffer = createTexture(WINDOW_WIDTH, WINDOW_HEIGHT);
-		redXorTexture = generateRedXorTexture(TEXTURE_SIZE);
-		greenXorTexture = generateGreenXorTexture(TEXTURE_SIZE);
-		blueXorTexture = generateBlueXorTexture(TEXTURE_SIZE);
-		grayXorTexture = generateGrayXorTexture(TEXTURE_SIZE);
-		TEXTURES[0] = redXorTexture;
-		TEXTURES[1] = greenXorTexture;
-		TEXTURES[2] = blueXorTexture;
-		TEXTURES[3] = grayXorTexture;
-
-		if
-		(!screenBuffer) return (FALSE);
-
-		for (x = 0; x < WINDOW_WIDTH; x++)
-			for (y = 0; y < WINDOW_HEIGHT; y++)
-				screenBuffer[(WINDOW_WIDTH * y) + x] 0xFFAAAAAA;
-
-		return (TRUE);
-	}
-
-int main(void)
-	{
-	Uint32 *screenBuffer = NULL;
-	Uint32 *redXorTexture = NULL;
-	Uint32 *greenXorTexture = NULL;
-	Uint32 *blueXorTexture = NULL;
-	Uint32 *grayXorTexture = NULL;
-
-	const Uint32 COLORS[4] = {
-		RGBtoABGR(255, 0, 0),
-		RGBtoABGR(0, 255, 0),
-		RGBtoABGR(0, 0, 255),
-		RGBtoABGR(128, 128, 128)
-	};
-
-	Uint32 *TEXTURES[4];
-
-	char gameIsRunning = TRUE;
-	char showMap = TRUE;
-	char distortion = FALSE;
-	char slowRenderMode = FALSE;
-	char RayCastMode = 0;
-	char textureMode = 0;
-
-	if (!setupWindow())
-	{
-		fprintf(stderr, "Could not Initialize raycaster!\n");
-		return (EXIT_FAILURE);
-	}
-	initPlayer();
-	initRaycaster();
-	runGame();
-
-	destoryGFX();
 	return (EXIT_SUCCESS);
 }
